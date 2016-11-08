@@ -124,11 +124,7 @@ PROCESS, and terminates standard input with EOF."
 
 (defun company-flow--prefix ()
   "Grab prefix for flow."
-  (and (or (null company-flow-modes)
-           (-contains? company-flow-modes major-mode))
-       buffer-file-name
-       (file-exists-p buffer-file-name)
-       (not (company-in-string-or-comment))
+  (and (not (company-in-string-or-comment))
        (or (company-grab-symbol-cons "\\." 1)
            'stop)))
 
@@ -177,7 +173,12 @@ Use like:
     (`annotation (company-flow--annotation arg))
     (`meta (company-flow--meta arg))
     (`sorted t)
-    (`candidates (cons :async (company-flow--debounce-async arg 'company-flow--candidates-query)))))
+    (`candidates
+     (when (and  (or (null company-flow-modes)
+                     (-contains? company-flow-modes major-mode))
+                 buffer-file-name
+                 (file-exists-p buffer-file-name))
+       (cons :async (company-flow--debounce-async arg 'company-flow--candidates-query))))))
 
 (provide 'company-flow)
 ;;; company-flow.el ends here
